@@ -3,8 +3,8 @@ This repo trains a Deep Reinforcement Learning (DRL) agent to solve the Unity ML
 The motivation for this program was the 2nd project in the Udacity Deep Reinforcement Learning 
 [Nanodegree](https://www.udacity.com/course/deep-reinforcement-learning-nanodegree--nd893). 
 
-
-## Reacher Environment
+## Project Details
+### Reacher Environment
 The [Reacher](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#reacher) 
 environment provided by [Unity](https://unity3d.com/machine-learning/) contains a double-jointed arm can move to target 
 locations. A reward of +0.1 is provided for each step that the agent's hand is in the goal location. 
@@ -61,7 +61,7 @@ be very helpful.  This was confirmed to work in Windows 10 Home.
     pip install .
     ```
 
-## How to run
+## Instructions
 ### Training the Agent
 The agent is trained and tested with the `run_test.py` script, which can be executed in your favorite IDE of the 
 following command:
