@@ -2,9 +2,11 @@
   <dictionary name="Daniel">
     <words>
       <w>drlnd</w>
+      <w>hyperparameters</w>
       <w>nanodegree</w>
       <w>reacher</w>
       <w>udacity</w>
+      <w>unityagents</w>
       <w>venv</w>
     </words>
   </dictionary>

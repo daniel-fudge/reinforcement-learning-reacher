@@ -5,7 +5,8 @@ This report is written to satisfy the `Report` component of the project 2 rubric
 the [rubric](https://review.udacity.com/#!/rubrics/1890/view).
 
 ## Learning Algorithm  
-As defined in the rubric, this section _"clearly describes the learning algorithm, along with the chosen hyperparameters. It also describes the model architectures for any neural networks"_.
+As defined in the rubric, this section _"clearly describes the learning algorithm, along with the chosen hyperparameters.
+It also describes the model architectures for any neural networks"_.
 
 This implementation uses a custom Python package `hunter` contained in this repository.  Within this package exists 3 submodules `model`, `dqn_agent` and `test`.
 
@@ -65,10 +66,11 @@ The image below illustrates this network.  Obviously, except for the output laye
 ![network](network.png)
 
 ## Plot of Rewards  
-The image below illustrates the scores of each episode as well as the running average score for the last 100 episodes.  As you can see, the algorithm solves the problem in 500 episodes by hitting a running average of 13.  
+The image below illustrates the score of each episode as well as the running average score for the last 100 episodes.
+As you can see, the algorithm solves the problem in **_XXX_** episodes by hitting a running average of +30.  Note that
+the score is the sum of the rewards the agent receives in an episode without discounting.
 
-![Rewards](score.png)
-
+![Scores](scores.png)
 
 ## Ideas for Future Work
 There is still much to be done for this project.  The most obvious would be to try different architectures, including number of nodes per layer, number of layers and the activation functions.  A little script could even be written to optimize these features.  
