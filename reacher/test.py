@@ -5,7 +5,7 @@ Note:  You need to verify the env path is correct for you PC and OS.
 """
 
 from collections import deque
-from reacher.dqn_agent import Agent
+from reacher.ddpg_agent import Agent
 import numpy as np
 import torch
 
