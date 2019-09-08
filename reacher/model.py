@@ -71,7 +71,7 @@ class Critic(nn.Module):
         self.fcs1.weight.data.uniform_(*hidden_init(self.fcs1))
         self.fc2.weight.data.uniform_(*hidden_init(self.fc2))
         self.fc3.weight.data.uniform_(-3e-3, 3e-3)
-        self.fc1.bias.data.fill_(0.1)
+        self.fcs1.bias.data.fill_(0.1)
         self.fc2.bias.data.fill_(0.1)
         self.fc3.bias.data.fill_(0.1)
 
