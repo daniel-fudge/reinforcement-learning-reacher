@@ -49,7 +49,7 @@ def make_plot(show=False):
     plt.close()
 
 
-def train(agent, env, n_episodes=2000, max_t=1000, eps_start=1.0, eps_end=0.01, eps_decay=0.995):
+def train(agent, env, n_episodes=200, max_t=1000, eps_start=1.0, eps_end=0.01, eps_decay=0.995):
     """This function trains the given agent in the given environment.
 
     Args:
@@ -90,7 +90,8 @@ def train(agent, env, n_episodes=2000, max_t=1000, eps_start=1.0, eps_end=0.01, 
         if np.mean(scores_window) >= 13.0:
             print('\nEnvironment solved in {:d} episodes!\tAverage Score: {:.2f}'.format(i_episode - 100,
                                                                                          np.mean(scores_window)))
-            torch.save(agent.qnetwork_local.state_dict(), 'checkpoint.pth')
+            torch.save(agent.actor_target.state_dict(), 'checkpoint_actor.pth')
+            torch.save(agent.critic_target.state_dict(), 'checkpoint_critic.pth')
             np.savez('scores.npz', scores)
             break
 
@@ -108,11 +109,9 @@ def setup(env):
     brain = env.brains[brain_name]
     env_info = env.reset(train_mode=True)[brain_name]
     action_size = brain.vector_action_space_size
-    states = env_info.vector_observations[0]
-    state_size = len(states)
+    state_size = env_info.vector_observations.shape[1]
 
     # Setup the agent and return it
     # -----------------------------------------------------------------------------------
     print('Setting up the agent.')
-    hidden_layer_sizes = (state_size, state_size, int((state_size + action_size) / 2.0))
-    return Agent(state_size=state_size, action_size=action_size, seed=0, h_sizes=hidden_layer_sizes)
+    return Agent(state_size=state_size, action_size=action_size, random_seed=42)

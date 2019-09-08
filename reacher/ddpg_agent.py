@@ -9,13 +9,15 @@ import torch
 import torch.nn.functional as nn_f
 import torch.optim as optimum
 
+# Set Learning hyperparameters
 BUFFER_SIZE = int(1e5)  # replay buffer size
-BATCH_SIZE = 128        # mini batch size
-GAMMA = 0.99            # discount factor
+BATCH_SIZE = 256        # mini batch size
+GAMMA = 0.9             # discount factor
 TAU = 1e-3              # for soft update of target parameters
-LR_ACTOR = 1e-4         # learning rate of the actor
+LR_ACTOR = 1e-3         # learning rate of the actor
 LR_CRITIC = 1e-3        # learning rate of the critic
 WEIGHT_DECAY = 0        # L2 weight decay
+SIGMA = 0.01            # OU Noise Standard deviation
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -133,14 +135,13 @@ class Agent:
 class OUNoise:
     """Ornstein-Uhlenbeck process."""
 
-    def __init__(self, size, seed, mu=0., theta=0.15, sigma=0.2):
+    def __init__(self, size, seed, mu=0., theta=0.15, sigma=SIGMA):
         """Initialize parameters and noise process."""
         self.mu = mu * np.ones(size)
         self.theta = theta
         self.sigma = sigma
         self.seed = random.seed(seed)
-        self.reset()
-        self.state = mu
+        self.state = copy.copy(self.mu)
 
     def reset(self):
         """Reset the internal state (= noise) to mean (mu)."""
