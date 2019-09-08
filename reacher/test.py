@@ -49,7 +49,7 @@ def make_plot(show=False):
     plt.close()
 
 
-def train(agent, env, n_episodes=200, max_t=1000, eps_start=1.0, eps_end=0.01, eps_decay=0.995):
+def train(agent, env, n_episodes=2000, max_t=1000, eps_start=1.0, eps_end=0.01, eps_decay=0.995):
     """This function trains the given agent in the given environment.
 
     Args:
@@ -87,13 +87,15 @@ def train(agent, env, n_episodes=200, max_t=1000, eps_start=1.0, eps_end=0.01, e
         print('\rEpisode {}\tAverage Score: {:.2f}'.format(i_episode, np.mean(scores_window)), end="")
         if i_episode % 100 == 0:
             print('\rEpisode {}\tAverage Score: {:.2f}'.format(i_episode, np.mean(scores_window)))
-        if np.mean(scores_window) >= 13.0:
+        if np.mean(scores_window) >= 30.0:
             print('\nEnvironment solved in {:d} episodes!\tAverage Score: {:.2f}'.format(i_episode - 100,
                                                                                          np.mean(scores_window)))
-            torch.save(agent.actor_target.state_dict(), 'checkpoint_actor.pth')
-            torch.save(agent.critic_target.state_dict(), 'checkpoint_critic.pth')
-            np.savez('scores.npz', scores)
             break
+
+    # Save models weights and scores
+    torch.save(agent.actor_target.state_dict(), 'checkpoint_actor.pth')
+    torch.save(agent.critic_target.state_dict(), 'checkpoint_critic.pth')
+    np.savez('scores.npz', scores)
 
 
 def setup(env):
