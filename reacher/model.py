@@ -5,7 +5,7 @@ import torch.nn.functional as nn_f
 
 # Set Architecture hyperparameters
 FC1_UNITS = 128          # Size if 1st Hidden layer
-FC2_UNITS = 128          # Size if 2nd Hidden layer
+FC2_UNITS = 64           # Size if 2nd Hidden layer
 
 
 def hidden_init(layer):
@@ -63,7 +63,7 @@ class Critic(nn.Module):
         super(Critic, self).__init__()
         self.seed = torch.manual_seed(seed)
         self.fcs1 = nn.Linear(state_size, FC1_UNITS)
-        self.fc2 = nn.Linear(FC2_UNITS + action_size, FC2_UNITS)
+        self.fc2 = nn.Linear(FC1_UNITS + action_size, FC2_UNITS)
         self.fc3 = nn.Linear(FC2_UNITS, 1)
         self.reset_parameters()
 
