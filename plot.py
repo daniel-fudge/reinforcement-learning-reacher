@@ -1,3 +1,3 @@
-from reacher.test import make_plot
+from reacher.train import make_plot
 
 make_plot()

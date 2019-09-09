@@ -4,7 +4,7 @@ This script trains and saves the model and plots its performance.
 Note:  You need to verify the env path is correct for you PC and OS.
 """
 
-from reacher.test import make_plot, setup, train
+from reacher.train import make_plot, setup, train
 import os
 from unityagents import UnityEnvironment
 

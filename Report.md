@@ -8,50 +8,79 @@ the [rubric](https://review.udacity.com/#!/rubrics/1890/view).
 As defined in the rubric, this section _"clearly describes the learning algorithm, along with the chosen hyperparameters.
 It also describes the model architectures for any neural networks"_.
 
-This implementation uses a custom Python package `hunter` contained in this repository.  Within this package exists 3 submodules `model`, `dqn_agent` and `test`.
+This implementation uses a custom Python package `reacher` contained in this repository.  Within this package exists 3 
+submodules `model`, `ddpg_agent` and `test`.
 
 ### `model` Submodule
-The `model` submodule  defines a `QNetwork` class that extends the `torch.nn.Module` class.  
-It's initialization method accepts the following 4 arguments.  
+The `model` submodule  defines an `Actor` and `Critic` class that extends the `torch.nn.Module` class.  
+Their initialization methods accept the following 3 arguments.  
 - `state_size` (int): Dimension of each state.  
 - `action_size` (int): Dimension of each action.  
 - `seed` (int): Random seed.  
-- `h_sizes` (tuple): The number of nodes for each hidden layer.  
 
-From the `h_sizes`, linear fully connected hidden layers are created with the `torch.nn.ModuleList` method.  A linear layer is also added to connect the input layer to the hidden layers and the hidden layers to the output layer.  
+They also use the `FC1_UNITS` and `FC2_UNITS` global variables to define the size of the linear fully connected hidden 
+layers as illustrated in the Architecture section below.  
 
-The `QNetwork` class also has a `forward` method that accepts the current state and propagates it forward through the linear network, while applying the `torch.nn.functional.relu` rectified linear unit to each layer in the propagation.  This method then returns the result of the output layer as a `torch.tensor`.
+The `Actor` and `Critic` classes also have a `forward` method that accepts the current state and propagates it forward 
+through the linear network, while applying the `torch.nn.functional.relu` rectified linear unit to each layer in the 
+propagation.  The `Actor` applies the `torch.nn.functional.tanh` function to the output of the final layer to generate 
+output between -1 and 1 as required for the action space.  Where as the `Critic` generates a single Q-value for the 
+state and action provided by the `Actor`.
 
-### `dqn_agent` Submodule
-The `dqn_agent` submodule defines 2 classes; `Agent` and `ReplayBuffer`.  
+### `ddpg_agent` Submodule
+The `ddpg_agent` submodule defines 3 classes; `Agent`, `ReplayBuffer` and `OUNoise`.  
 
-The `ReplayBuffer` class stores the experience tuples with its `add` method and allows them to be sampled with its `sample` method to perform experience replay learning.  
+The `ReplayBuffer` class stores the experience tuples with its `add` method and allows them to be sampled with its 
+`sample` method to perform experience replay learning.  
 
-The `Agent` class creates a Double Q-Learning Network from the `hunter.model.QNetwork` class; `self.qnetwork_local` and `self.qnetwork_target`.  It also employs experience replay with `self.memory` using the `hunter.dqn_agent.ReplayBuffer`.  
+The `Agent` class creates a local and target `reacher.model.Critic` class; `self.critic_local` and `self.critic_target`. 
+As well as a local and target `reacher.model.Actor` class; `self.actor_local` and `self.actor_target`, with the 
+`torch.optim.adam` optimizer applied to both local networks.  It also employs experience replay with `self.memory` using 
+the `reacher.ddpg_agent.ReplayBuffer`.  
 
-The `Agent.act` method returns the appropriate Epsilon-greedy action based on the given `eps` value and the maximum state-action pair from `self.qnetwork_local`.
+The `OUNoise` class simply defines an Ornstein-Uhlenbeck noise process to be applied to the actions returned from the 
+`Agent.act` method to aid learning.
 
-The `Agent.learn` method is given a set of experiences, which are a tuple of (s, a, r, s', done) tuples, and a discount factor `gamma`.  From these experiences it calculates the expected Q-value as `r + gamma * V(s')`, where `V(s')` comes from the `self.qnetwork_target`.  This expected value is compared with the predicted value from `self.qnetwork_local` to determine the loss with the `torch.nn.functional.mse_loss` function.  The loss is then passed through a backward propagation and the `torch.optim.Adam` optimizer to train the `self.qnetwork_local` network.  The final step is to update the `self.qnetwork_target` weights from `self.qnetwork_local` using the given `tau` parameter and the equation `target = tau*local + (1-tau)*target`.
+The `Agent.act` method returns action for the given state from the `self.actor_local` network with `OUNoise` added.
+
+The `Agent.learn` method is given a set of experiences, which are a tuple of (s, a, r, s', done) tuples, and a discount 
+factor `gamma`.  From these experiences trains both the local Actor and Critic and then performs a soft update from the 
+local to target networks for both the Actor and Critic.   
+For the Critic it calculates the expected Q-value as `r + gamma * V(s')`, where `V(s')` comes from the 
+`self.critic_target` using the actions from the `self.actor_target`.  This expected value is compared with the predicted 
+value from `self.critic_local` to determine the loss with the `torch.nn.functional.mse_loss` function.  The loss is then 
+passed through a backward propagation and the `torch.optim.Adam` optimizer to train the `self.critic_local` network.   
+For the Actor it defines the loss as the negative Q-Value of the local Actor's actions.  Since this negative value is 
+minimized in the back propagation and optimization, it maximizes the value of the given actions defined by the local 
+Actor.        
 
 ### `train` Submodule
-The `train` submodule brings the `model` and `dqn_agent` submodules together to train the agent.  
+The `train` submodule brings the `model` and `ddpg_agent` submodules together to train the agent.  
 
 The `train.setup` function simply initializes the environment and agent.  
-The `train.train` function takes the given environment and agent, then trains the agent for the given maximum number of episodes or until the running mean error for 100 episode is 13 or greater.  Once the training is complete the weights are saved as `checkpoint.pth` and the scores are saved as a NumPy object as `scores.npz`.
+The `train.train` function takes the given environment and agent, then trains the agent for the given maximum number of 
+episodes or until the running mean error for 100 episode is 30 or greater.  Once the training is complete the weights 
+are saved as `checkpoint_actor.pth` and `checkpoint_critic.pth` and the scores are saved as a NumPy object as 
+`scores.npz`.
 
-For each time step, the function first determines the action `a` from the `Agent.act` method and the current state `s`.  Then queries the environment to determine the resulting next state `s'`, reward `r` and if the episode is `done`.  This combines to make an experience `(s, a, r, s', done)` tuple.  
+For each time step, the function first determines the action `a` from the `Agent.act` method and the current state `s`.  
+Then queries the environment to determine the resulting next state `s'`, reward `r` and if the episode is `done`.  This 
+combines to make an experience `(s, a, r, s', done)` tuple.  
 
-The `Agent.step` method then adds this experience to memory and if the time step is a multiple of `UPDATE_EVERY` global variable, the `Agent.learn` method is called with a random sample of experience tuples from memory to update the Q-Networks as described above.  This is repeated for each time step until a True `done` value is returned from the environment.  
+The `Agent.step` method then adds this experience to memory and the `Agent.learn` method is called with a random sample 
+of experience tuples from memory to update the Q-Networks as described above.  This is repeated for each time step until 
+a True `done` value is returned from the environment.  
 
 The `Agent.make_plot` submodule simply reads the `scores.npz` file and generates a plot of the reward evolution.  
 
 ### Hyperparameters
 The hyperparameters used in the successful training are listed below.
-- `gamma = 0.99` The discount factor used in `r + gamma * V(s')` from `Agent.learn`.
-- `tau = 0.001` The update factor used in `tau*local + (1-tau)*target` from `Agent.learn`.
-- `lr = 0.0005` The learning rate passed to the `torch.optim.Adam` optimizer.
-- `UPDATE_EVERY = 4` How frequent `Agent.step` calls `Agent.learn`.
-- `batch_size = 64` How many random experiences are passed to `Agent.learn`.
+- `batch_size = 256` How many random experiences are passed to `Agent.learn`.
+- `buffer_size = 100,000` Number of experiences to save to limit memory usage.
+- `gamma = 0.9` The discount factor used in `r + gamma * V(s')` from `Agent.learn`.
+- `tau = 0.001` The soft update factor used in `tau*local + (1-tau)*target` from `Agent.learn`.
+- `lr_actor = 0.001` The Actor learning rate passed to the `torch.optim.Adam` optimizer.
+- `lr_critic = 0.001` The Critic learning rate passed to the `torch.optim.Adam` optimizer.
 - `eps_start, eps_decay, eps_end = 1.0, 0.995, 0.01` Used to calculate the probability that the greedy action or random action is selected with the equation `eps = max(eps_end, eps_decay * eps)`.
 - `max_t = 1000` The maximum number of time steps per episode.  
 

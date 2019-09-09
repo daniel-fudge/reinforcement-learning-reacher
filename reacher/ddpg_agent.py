@@ -10,8 +10,8 @@ import torch.nn.functional as nn_f
 import torch.optim as optimum
 
 # Set Learning hyperparameters
-BUFFER_SIZE = int(1e5)  # replay buffer size
 BATCH_SIZE = 256        # mini batch size
+BUFFER_SIZE = int(1e5)  # replay buffer size
 GAMMA = 0.9             # discount factor
 TAU = 1e-3              # for soft update of target parameters
 LR_ACTOR = 1e-3         # learning rate of the actor

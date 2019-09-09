@@ -35,7 +35,7 @@ def make_plot(show=False):
     plt.scatter(x, scores, s=2, c='k', label='Raw Scores', zorder=4)
     plt.plot(x[99:], rolling_mean, lw=2, label='Rolling Mean', zorder=3)
     plt.scatter(x_max, rolling_mean[-1], c='g', s=40, marker='*', label='Episode {}'.format(x_max), zorder=5)
-    plt.plot([0, x_max], [13, 13], lw=1, c='grey', ls='--', label='Target Score = 13', zorder=1)
+    plt.plot([0, x_max], [30, 30], lw=1, c='grey', ls='--', label='Target Score = 30', zorder=1)
     plt.plot([x_max, x_max], [y_min, rolling_mean[-1]], lw=1, c='grey', ls='--', label=None, zorder=2)
     plt.ylabel('Score')
     plt.xlabel('Episode #')
@@ -45,11 +45,11 @@ def make_plot(show=False):
     if show:
         plt.show()
     else:
-        plt.savefig('scores.png')
+        plt.savefig('scores.png', dpi=200)
     plt.close()
 
 
-def train(agent, env, n_episodes=2000, max_t=1000, eps_start=1.0, eps_end=0.01, eps_decay=0.995):
+def train(agent, env, n_episodes=2000, max_t=1000):
     """This function trains the given agent in the given environment.
 
     Args:
@@ -57,21 +57,17 @@ def train(agent, env, n_episodes=2000, max_t=1000, eps_start=1.0, eps_end=0.01, 
         env (unityagents.UnityEnvironment):  The training environment
         n_episodes (int): maximum number of training episodes
         max_t (int): maximum number of time steps per episode
-        eps_start (float): starting value of epsilon, for epsilon-greedy action selection
-        eps_end (float): minimum value of epsilon
-        eps_decay (float): multiplicative factor (per episode) for decreasing epsilon
     """
 
     scores = list()
     scores_window = deque(maxlen=100)
-    eps = eps_start
     brain_name = env.brain_names[0]
     for i_episode in range(1, n_episodes + 1):
         brain_info = env.reset(train_mode=True)[brain_name]
         state = brain_info.vector_observations[0]
         score = 0
         for t in range(max_t):
-            action = agent.act(state, eps)
+            action = agent.act(state=state)
             brain_info = env.step(action)[brain_name]
             next_state = brain_info.vector_observations[0]
             reward = brain_info.rewards[0]
@@ -83,7 +79,6 @@ def train(agent, env, n_episodes=2000, max_t=1000, eps_start=1.0, eps_end=0.01, 
                 break
         scores_window.append(score)  # save most recent score
         scores.append(score)  # save most recent score
-        eps = max(eps_end, eps_decay * eps)  # decrease epsilon
         print('\rEpisode {}\tAverage Score: {:.2f}'.format(i_episode, np.mean(scores_window)), end="")
         if i_episode % 100 == 0:
             print('\rEpisode {}\tAverage Score: {:.2f}'.format(i_episode, np.mean(scores_window)))
