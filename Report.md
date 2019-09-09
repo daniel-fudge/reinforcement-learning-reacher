@@ -9,7 +9,7 @@ As defined in the rubric, this section _"clearly describes the learning algorith
 It also describes the model architectures for any neural networks"_.
 
 This implementation uses a custom Python package `reacher` contained in this repository.  Within this package exists 3 
-submodules `model`, `ddpg_agent` and `test`.
+submodules `model`, `ddpg_agent` and `train`.
 
 ### `model` Submodule
 The `model` submodule  defines an `Actor` and `Critic` class that extends the `torch.nn.Module` class.  
@@ -81,28 +81,28 @@ The hyperparameters used in the successful training are listed below.
 - `tau = 0.001` The soft update factor used in `tau*local + (1-tau)*target` from `Agent.learn`.
 - `lr_actor = 0.001` The Actor learning rate passed to the `torch.optim.Adam` optimizer.
 - `lr_critic = 0.001` The Critic learning rate passed to the `torch.optim.Adam` optimizer.
-- `eps_start, eps_decay, eps_end = 1.0, 0.995, 0.01` Used to calculate the probability that the greedy action or random action is selected with the equation `eps = max(eps_end, eps_decay * eps)`.
 - `max_t = 1000` The maximum number of time steps per episode.  
 
 ### Model Architecture
-The `test.setup` method creates the model architecture with three linear fully connected hidden layers based on the given state and action space sizes with the following number of nodes.  
-1. 1st layer is the same as the state space.  
-2. 2nd layer is also the same as the state space.  
-3. 3rd layer is the integer mean of the state and action spaces.  
-
-The image below illustrates this network.  Obviously, except for the output layer, the number of nodes is reduced to simplify the image.  
+The image below illustrates the Actor and Critic networks.  As mentioned above the ReLU activation function is used on 
+all nodes except the final layer.  The Actor also applies the hyperbolic tangent function to the output to keep the 
+actions between -1 and 1.
 
 ![network](network.png)
 
 ## Plot of Rewards  
 The image below illustrates the score of each episode as well as the running average score for the last 100 episodes.
-As you can see, the algorithm solves the problem in **_XXX_** episodes by hitting a running average of +30.  Note that
+As you can see, the algorithm solves the problem in 317 episodes by hitting a running average of +30.  Note that
 the score is the sum of the rewards the agent receives in an episode without discounting.
 
 ![Scores](scores.png)
 
 ## Ideas for Future Work
-There is still much to be done for this project.  The most obvious would be to try different architectures, including number of nodes per layer, number of layers and the activation functions.  A little script could even be written to optimize these features.  
-Prioritized learning is another interesting strategy that would be worth trying.  
-Since the noise in this environment is fairly low, I don't expect drop out to be very effective, however testing this hypothesis could be enlightening.
-And as always, tuning the hyperparameters and testing different optimizers and loss functions would most likely yield improvements.
+There is still much to be done for this project.  The most obvious would be to try different architectures, including 
+number of nodes per layer, number of layers and the activation functions.  A little script could even be written to 
+optimize these features.  
+The [paper](https://arxiv.org/abs/1604.06778) by Duan et al. also evaluated eight algorithms for continuous control 
+that would be very interesting to investigate.  However the Proximal Policy Optimization (PPO) discussed by 
+[OpenAI](https://openai.com/blog/openai-baselines-ppo/) interests me the most due to the promised ease of tuning.  I 
+believe this may be extremely important in new applications where hyperparameter tuning may become very costly and error
+prone.
