@@ -16,7 +16,6 @@ GAMMA = 0.9             # discount factor
 TAU = 1e-3              # for soft update of target parameters
 LR_ACTOR = 1e-3         # learning rate of the actor
 LR_CRITIC = 1e-3        # learning rate of the critic
-WEIGHT_DECAY = 0        # L2 weight decay
 SIGMA = 0.01            # OU Noise Standard deviation
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -45,7 +44,7 @@ class Agent:
         # Critic Network (w/ Target Network)
         self.critic_local = Critic(state_size, action_size, random_seed).to(device)
         self.critic_target = Critic(state_size, action_size, random_seed).to(device)
-        self.critic_optimizer = optimum.Adam(self.critic_local.parameters(), lr=LR_CRITIC, weight_decay=WEIGHT_DECAY)
+        self.critic_optimizer = optimum.Adam(self.critic_local.parameters(), lr=LR_CRITIC)
 
         # Noise process
         self.noise = OUNoise(action_size, random_seed)
@@ -63,15 +62,14 @@ class Agent:
             experiences = self.memory.sample()
             self.learn(experiences, GAMMA)
 
-    def act(self, state, add_noise=True):
+    def act(self, state):
         """Returns actions for given state as per current policy."""
         state = torch.from_numpy(state).float().to(device)
         self.actor_local.eval()
         with torch.no_grad():
             action = self.actor_local(state).cpu().data.numpy()
         self.actor_local.train()
-        if add_noise:
-            action += self.noise.sample()
+        action += self.noise.sample()
         return np.clip(action, -1, 1)
 
     def reset(self):
